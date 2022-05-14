@@ -1,9 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import { theme } from './color';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native-web';
+import { Fontisto } from '@expo/vector-icons';
 
 const STORAGE_KEY = "@toDos"
 
@@ -20,7 +20,7 @@ export default function App() {
   }
   const loadToDos = async()=>{
     const s = await AsyncStorage.getItem(STORAGE_KEY)
-    console.log(s, JSON.parse(s))
+    // console.log(s, JSON.parse(s))
     setToDos(JSON.parse(s))
   }
   useEffect(()=>{
@@ -46,8 +46,25 @@ export default function App() {
     // console.log(toDos[1652104358532]);
     // console.log(Object.keys(toDos)[0]);
   }
+  const deleteToDo = async(res)=>{
+    Alert.alert(
+      "Delete To Do",
+      "Are you sure?", 
+      [
+        {text: "Cancel"},
+        {text: "I'm sure", onPress: ()=>{
+          const newToDos = {...toDos}
+          delete newToDos[res]
+          console.log(newToDos)
+          setToDos(newToDos);
+          saveToDos(newToDos)
+        } }        
+      ]
+    );
 
-  
+
+    
+  }  
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -71,6 +88,9 @@ export default function App() {
           {Object.keys(toDos).map((res)=>(
             toDos[res].working === working? <View key={res} style={styles.toDo}>
               <Text style={styles.toDoText}>{toDos[res].text}</Text>
+              <TouchableOpacity onPress={()=> deleteToDo(res)}>
+                <Fontisto name="trash" size={20} color="white" />
+              </TouchableOpacity>
             </View> : null
           ))}
         </ScrollView>
@@ -107,6 +127,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   toDoText:{
     color:"white",
